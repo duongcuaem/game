@@ -6,6 +6,7 @@ import java.util.Date;
 import java.nio.charset.StandardCharsets;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -72,7 +73,11 @@ public class JwtUtils {
                 .build() // Xây dựng đối tượng parser
                 .parseClaimsJws(token); // Phân tích và xác minh chữ ký của token
             return true; // Token hợp lệ
-        } catch (JwtException e) {
+        } catch (ExpiredJwtException e) { // Trường hợp token đã hết hạn
+            System.err.println("JWT token has expired: " + e.getMessage());
+            // Thay vì trả về false, ném ra ngoại lệ hoặc trả về một trạng thái đặc biệt
+            return false; 
+        }catch (JwtException e) {
             System.err.println("Invalid JWT token: " + e.getMessage());
         }
         return false; // Token không hợp lệ

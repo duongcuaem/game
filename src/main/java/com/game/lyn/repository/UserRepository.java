@@ -1,9 +1,11 @@
-package com.game.lyn.user.repository;
+package com.game.lyn.repository;
+
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.game.lyn.user.entity.User;
+import com.game.lyn.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -11,5 +13,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
 
     // Tìm người dùng theo username
-    User findByUsername(String username);
+    Optional<User> findByUsername(String username);
 }

@@ -1,8 +1,6 @@
-package com.game.lyn.user.entity;
+package com.game.lyn.entity;
 
 import java.util.Date;
-
-import com.game.lyn.common.base.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

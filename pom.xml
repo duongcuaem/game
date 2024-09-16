@@ -116,6 +116,11 @@
 			<scope>provided</scope>
 		</dependency>
 		
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.1.0</version> <!-- Sử dụng phiên bản cho Spring Boot 3 -->
+		</dependency>		
 
 		<!-- Test dependencies -->
 		<dependency>

@@ -14,40 +14,46 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.game.lyn.security.JwtRequestFilter;
 
-@Configuration
-@EnableWebSecurity
+@Configuration  // Đánh dấu class này là một class cấu hình của Spring
+@EnableWebSecurity  // Kích hoạt Spring Security để bảo vệ ứng dụng
 public class WebSecurityConfig {
 
+    // JwtRequestFilter là một custom filter để xử lý xác thực JWT
     private final JwtRequestFilter jwtRequestFilter;
 
+    // Constructor để tiêm JwtRequestFilter
     public WebSecurityConfig(JwtRequestFilter jwtRequestFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
     }
 
+    // Phương thức cấu hình bảo mật với HttpSecurity
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())  // Vô hiệu hóa CSRF (nếu không cần)
+            .csrf(csrf -> csrf.disable())  // Vô hiệu hóa CSRF, thường không cần thiết khi sử dụng JWT
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/register", "/auth/login").permitAll()  // Cho phép truy cập không cần xác thực
-                .requestMatchers("/auth/register/admin", "/auth/login/admin").permitAll()  // Cho phép truy cập không cần xác thực
-                .requestMatchers("/admin/super/**").hasRole("SUPER_ADMIN")  // Chỉ cho phép SUPER_ADMIN truy cập
-                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")  // Yêu cầu quyền ADMIN cho các endpoint bắt đầu bằng /admin
-                .anyRequest().authenticated()  // Các yêu cầu khác đều cần xác thực
+                .requestMatchers("/auth/register", "/auth/login").permitAll()  // Cho phép truy cập không cần xác thực cho các endpoint này
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()  // Cho phép truy cập không cần xác thực cho Swagger UI
+                .requestMatchers("/admin/super/**").hasRole("SUPER_ADMIN")  // Chỉ người dùng với vai trò SUPER_ADMIN mới có quyền truy cập endpoint này
+                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")  // Người dùng có vai trò ADMIN hoặc SUPER_ADMIN mới có quyền truy cập
+                .anyRequest().authenticated()  // Các yêu cầu khác đều yêu cầu người dùng phải xác thực
             )
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Thiết lập session theo kiểu stateless (vì sử dụng JWT)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Cấu hình session stateless vì sử dụng JWT (không lưu trữ session trên server)
             )
-            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);  // Thêm JWT filter trước UsernamePasswordAuthenticationFilter
+            // Thêm JWT filter trước UsernamePasswordAuthenticationFilter để xử lý JWT trước khi xác thực thông thường
+            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
+        return http.build();  // Trả về cấu hình HttpSecurity đã hoàn thành
     }
 
+    // Bean để mã hóa mật khẩu sử dụng BCryptPasswordEncoder, đây là một tiêu chuẩn tốt cho bảo mật mật khẩu
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // Bean để cung cấp AuthenticationManager, cần thiết khi muốn quản lý xác thực tùy chỉnh
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
