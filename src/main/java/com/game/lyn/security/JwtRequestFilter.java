@@ -57,43 +57,48 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             
             // Tìm token trong cơ sở dữ liệu
             Optional<Token> tokenOptional = tokenRepository.findByToken(jwt);
-            // Kiểm tra tính hợp lệ của token và token chưa bị thu hồi
-            if (tokenOptional.isPresent() && jwtUtils.validateJwtToken(jwt) && !tokenOptional.get().getIsRevoked()) {
+            
+            if (tokenOptional.isPresent()) {
                 Token token = tokenOptional.get();
 
-                // Kiểm tra nếu token đã hết hạn thì cập nhật trạng thái của nó
+                // Kiểm tra nếu token đã hết hạn
                 if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
+                    // Token hết hạn, cập nhật trạng thái token thành revoked và trả về 401
                     token.setIsRevoked(true);
-                    tokenRepository.save(token); // Lưu lại trạng thái token là đã bị thu hồi
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Trả về mã lỗi 401
-                    return;
+                    tokenRepository.save(token); // Cập nhật trạng thái token trong DB
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Trả về mã lỗi 401 Unauthorized
+                    response.getWriter().write("Token has expired"); // Thông báo token hết hạn
+                    return; // Dừng chuỗi xử lý
                 }
 
-                User user = token.getUser();  // Lấy thông tin người dùng từ token
+                // Kiểm tra tính hợp lệ của token và token chưa bị thu hồi
+                if (jwtUtils.validateJwtToken(jwt) && !token.getIsRevoked()) {
+                    User user = token.getUser();  // Lấy thông tin người dùng từ token
 
-                // Lấy vai trò của người dùng
-                List<String> roles = user.getRoles().stream()
-                .map(role -> role.getRoleName())  // Giả sử `roleName` là tên của vai trò trong class `Role`
-                .collect(Collectors.toList());
-
-                // Tạo danh sách authorities từ vai trò
-                List<org.springframework.security.core.GrantedAuthority> authorities = roles.stream()
-                        .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(role))
+                    // Lấy vai trò của người dùng
+                    List<String> roles = user.getRoles().stream()
+                        .map(role -> role.getRoleName())  // Giả sử `roleName` là tên của vai trò trong class `Role`
                         .collect(Collectors.toList());
 
-                // Tạo đối tượng xác thực cho Spring Security
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                    // Tạo danh sách authorities từ vai trò
+                    List<org.springframework.security.core.GrantedAuthority> authorities = roles.stream()
+                            .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(role))
+                            .collect(Collectors.toList());
 
-                // Thiết lập thông tin chi tiết cho request
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    // Tạo đối tượng xác thực cho Spring Security
+                    UsernamePasswordAuthenticationToken authenticationToken =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
 
-                // Cập nhật SecurityContext với đối tượng xác thực
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    // Thiết lập thông tin chi tiết cho request
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // Cập nhật SecurityContext với đối tượng xác thực
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
             }
         }
 
-        // Tiếp tục chuỗi filter
+        // Tiếp tục chuỗi filter nếu không có vấn đề với token
         filterChain.doFilter(request, response);
     }
 }

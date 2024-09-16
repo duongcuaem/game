@@ -2,6 +2,9 @@ package com.game.lyn.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.game.lyn.entity.User;
+
 import java.util.Collection;
 
 public class MyUserDetails implements UserDetails {
@@ -15,6 +18,14 @@ public class MyUserDetails implements UserDetails {
         this.username = username;
         this.password = password;
         this.authorities = authorities;
+    }
+    
+    public User toUser() {
+        User user = new User();
+        user.setId(this.id); // Sử dụng id từ MyUserDetails
+        user.setUsername(this.username); // Sử dụng username từ MyUserDetails
+        user.setPassword(this.password); // Sử dụng password từ MyUserDetails
+        return user; // Trả về đối tượng User
     }
 
     public Long getId() {

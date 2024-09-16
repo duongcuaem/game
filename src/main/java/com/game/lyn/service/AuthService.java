@@ -8,6 +8,7 @@ import com.game.lyn.exception.CustomException;
 import com.game.lyn.repository.TokenRepository;
 import com.game.lyn.repository.UserRepository;
 import com.game.lyn.security.JwtUtils;
+import com.game.lyn.security.MyUserDetails;
 import com.game.lyn.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -98,8 +99,9 @@ public class AuthService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             // Lấy thông tin người dùng
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            User user = (User) authentication.getPrincipal();
+            MyUserDetails userDetails = (MyUserDetails) userDetailsService.loadUserByUsername(username);
+            User user = new User();
+            user.setId(userDetails.getId());
 
             // Tạo JWT token
             String jwtToken = jwtUtils.generateToken(username, userDetails.getAuthorities());
