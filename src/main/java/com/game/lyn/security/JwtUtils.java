@@ -15,6 +15,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 import java.util.List;
+
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -52,6 +54,15 @@ public class JwtUtils {
                 .parseClaimsJws(token) // Phân tích token
                 .getBody() // Lấy phần thân của token (claims)
                 .getSubject(); // Lấy thông tin username từ claims
+    }
+
+    // Giải mã và lấy thông tin từ JWT
+    public Map<String, Object> getClaimsFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     // Lấy quyền hạn (roles) từ JWT token
