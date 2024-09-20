@@ -83,7 +83,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.2.20</version> <!-- Phiên bản PostgreSQL driver -->
+			<version>42.7.2</version> <!-- Cập nhật phiên bản PostgreSQL driver để sửa lỗi bảo mật -->
 		</dependency>
 
 		<!-- logger -->
@@ -126,6 +126,26 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Cache redis -->
+		 <!-- Spring Boot Starter Cache -->
+		 <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+	
+		<!-- Spring Boot Starter for Redis -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<!-- Mockito for mocking dependencies dung để unit test -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
