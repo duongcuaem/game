@@ -7,6 +7,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+
 import java.util.Map;
 
 @Component
@@ -20,6 +21,7 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    @SuppressWarnings("null")
     @Override
     public Mono<Void> handle(WebSocketSession session) {
         // Lấy JWT token từ URL khi kết nối WebSocket
@@ -28,28 +30,48 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
 
         // Giải mã JWT để lấy ID người dùng và nhóm
         Map<String, Object> claims = jwtTokenProvider.getClaimsFromToken(token);
-        Integer userId = (Integer) claims.get("userId");
+        Long userId = (Long) claims.get("userId");
 
         // Đoạn này sẽ lấy thông tin các nhóm mà user cần gửi thông báo bằng quan hệ gì đó,
-        String groupName = (String) claims.get("group");
+        Long groupId  = (Long) claims.get("group");
 
-        // Thêm session vào map với key là userId
+        // Thêm session của người dùng vào Redis và nhóm
         notificationManager.addSessionForUser(userId, session);
+        notificationManager.addSessionToGroup(groupId, userId, session);
 
-        // Thêm session vào nhóm
-        notificationManager.addSessionToGroup(groupName, session);
 
+        // Lắng nghe các tin nhắn từ client và phản hồi
         return session.receive() //Duongdx: chưa hiểu đoạn này rảnh cần kiểm tra lại
                 .doOnNext(message -> {
-                    // Xử lý các tin nhắn khác (nếu có)
-                    System.out.println("Received message: " + message.getPayloadAsText());
+                    String payload = message.getPayloadAsText();
+                    System.out.println("Received message from user " + userId + ": " + payload);
+
+                    // Xử lý tin nhắn theo yêu cầu
+                    if (payload.startsWith("@user:")) {
+                        // Gửi tin nhắn riêng tư đến user khác (theo userId)
+                        String[] parts = payload.split(":");
+                        Long recipientId = Long.valueOf(parts[1]);
+                        String privateMessage = parts[2];
+                        notificationManager.sendNotificationToUser(recipientId, privateMessage).subscribe();
+                    } else if (payload.startsWith("@group:")) {
+                        // Gửi tin nhắn đến cả nhóm (theo groupId)
+                        String groupMessage = payload.split(":")[1];
+                        notificationManager.sendNotificationToGroup(groupId, groupMessage).subscribe();
+                    }
+                    
+                    // Lưu thông báo vào MongoDB
+                    notificationManager.saveNotificationToDatabase(userId, groupId, payload).subscribe();
+
+                    // Gửi phản hồi lại cho client
+                    session.send(Mono.just(session.textMessage("Message processed: " + payload))).subscribe();
+
                 })
                 .doOnTerminate(() -> {
                     // Khi kết nối đóng, loại bỏ session
                     notificationManager.removeSessionForUser(userId);
-                    notificationManager.removeSessionFromGroup(groupName, session);
+                    notificationManager.removeSessionFromGroup(groupId, userId);
                 })
-                .then();
+                .then();// Đóng stream khi kết thúc
     }
 
     // Hàm tách token từ URL query string
