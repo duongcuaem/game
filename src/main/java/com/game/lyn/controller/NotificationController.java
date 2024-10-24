@@ -1,29 +1,30 @@
 package com.game.lyn.controller;
 
-import com.game.lyn.manager.NotificationManager;
+import com.game.lyn.entity.Notification;
+import com.game.lyn.service.NotificationService;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @RestController
 public class NotificationController {
 
-    private final NotificationManager notificationManager;
+    private final NotificationService notificationService;
 
-    public NotificationController(NotificationManager notificationManager) {
-        this.notificationManager = notificationManager;
+    public NotificationController(NotificationService notificationService) {
+        this.notificationService = notificationService;
     }
 
-    // API để gửi thông báo tới một người dùng cụ thể dựa trên ID của họ
-    @PostMapping("/send-notification-user")
-    public void sendNotificationToUser(@RequestParam Long userId, @RequestParam String message) {
-        notificationManager.sendNotificationToUser(userId, message); // Gửi thông báo đến userId
+    // Gửi thông báo dưới dạng model Notification
+    @PostMapping("/notify/user")
+    public Mono<Void> notifyUser(@RequestBody Notification notification) {
+        return notificationService.notifyUser(notification.getUserId(), notification.getMessage());
     }
 
-    // API để gửi thông báo tới nhóm cụ thể
-    @PostMapping("/send-notification-group")
-    public void sendNotificationToGroup(@RequestParam Long group, @RequestParam String message) {
-        notificationManager.sendNotificationToGroup(group, message); // Gửi thông báo đến group
+    // Gửi thông báo đến một nhóm dưới dạng model Notification
+    @PostMapping("/notify/group")
+    public Mono<Void> notifyGroup(@RequestBody Notification notification) {
+        return notificationService.notifyGroup(notification.getGroupId(), notification.getUserId(), notification.getMessage());
     }
 }
-

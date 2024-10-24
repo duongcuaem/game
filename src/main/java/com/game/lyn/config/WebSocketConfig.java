@@ -13,12 +13,14 @@ public class WebSocketConfig {
     // WebSocketHandlerAdapter để xử lý các yêu cầu WebSocket
     @Bean
     public WebSocketHandlerAdapter handlerAdapter() {
+        // Kết hợp WebSocketHandler với WebSocketService để tạo kết nối WebSocket
         return new WebSocketHandlerAdapter(webSocketService());
     }
 
     // Sử dụng HandshakeWebSocketService thay vì WebSocketService để xử lý nâng cấp kết nối WebSocket
     @Bean
     public WebSocketService webSocketService() {
+        // ReactorNettyRequestUpgradeStrategy: chiến lược nâng cấp từ HTTP lên WebSocket, sử dụng Netty
         return new HandshakeWebSocketService(new ReactorNettyRequestUpgradeStrategy());
     }
 }
