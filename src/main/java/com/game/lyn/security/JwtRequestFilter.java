@@ -101,4 +101,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         // Tiếp tục chuỗi filter nếu không có vấn đề với token
         filterChain.doFilter(request, response);
     }
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // Bỏ qua filter cho endpoint WebSocket
+        return request.getServletPath().startsWith("/ws");
+    }
 }

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.3</version> <!-- Phiên bản Spring Boot chính xác -->
+		<version>3.3.5</version> <!-- Phiên bản Spring Boot chính xác -->
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	
@@ -82,8 +82,7 @@
 		<!-- PostgreSQL Driver -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>42.7.2</version> <!-- Cập nhật phiên bản PostgreSQL driver để sửa lỗi bảo mật -->
+			<artifactId>postgresql</artifactId> <!-- Cập nhật phiên bản PostgreSQL driver để sửa lỗi bảo mật -->
 		</dependency>
 
 		<!-- logger -->
@@ -141,11 +140,16 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Cache redis -->
-		 <!-- Spring Boot Starter Cache -->
-		 <dependency>
+		<!-- MongoDB -->
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-cache</artifactId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+
+		<!-- Redis -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
 	
 		<!-- Spring Boot Starter for Redis -->
@@ -168,7 +172,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
 				<configuration>
 					<source>17</source> <!-- Cấu hình source level cho Java 17 -->
 					<target>17</target> <!-- Cấu hình target level cho Java 17 -->

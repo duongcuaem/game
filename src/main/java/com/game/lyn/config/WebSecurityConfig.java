@@ -1,5 +1,6 @@
 package com.game.lyn.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,8 +12,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.game.lyn.security.JwtRequestFilter;
+import java.util.List;
 
 @Configuration  // Đánh dấu class này là một class cấu hình của Spring
 @EnableWebSecurity  // Kích hoạt Spring Security để bảo vệ ứng dụng
@@ -20,6 +25,10 @@ public class WebSecurityConfig {
 
     // JwtRequestFilter là một custom filter để xử lý xác thực JWT
     private final JwtRequestFilter jwtRequestFilter;
+
+    // Inject biến clientUrl từ application.properties
+    @Value("${app.client.url}")
+    private String clientUrl;
 
     // Constructor để tiêm JwtRequestFilter
     public WebSecurityConfig(JwtRequestFilter jwtRequestFilter) {
@@ -30,8 +39,10 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Thêm cấu hình CORS
             .csrf(csrf -> csrf.disable())  // Vô hiệu hóa CSRF, thường không cần thiết khi sử dụng JWT
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/ws/**").permitAll() // Cho phép truy cập công khai đến WebSocket endpoint
                 .requestMatchers("/auth/register", "/auth/login").permitAll()  // Cho phép truy cập không cần xác thực cho các endpoint này
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()  // Cho phép truy cập không cần xác thực cho Swagger UI
                 .requestMatchers("/admin/super/**").hasRole("SUPER_ADMIN")  // Chỉ người dùng với vai trò SUPER_ADMIN mới có quyền truy cập endpoint này
@@ -57,5 +68,19 @@ public class WebSecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    // Cấu hình nguồn CORS để cho phép các yêu cầu từ các nguồn khác
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of(clientUrl)); // Cho phép nguồn từ localhost:5173 (client của bạn)
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Các phương thức được phép
+        configuration.setAllowedHeaders(List.of("*")); // Cho phép tất cả các header
+        configuration.setAllowCredentials(true); // Cho phép gửi cookie hoặc thông tin xác thực
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // Áp dụng cấu hình CORS cho tất cả các endpoint
+        return source;
     }
 }

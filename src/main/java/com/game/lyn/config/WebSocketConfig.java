@@ -1,24 +1,29 @@
 package com.game.lyn.config;
 
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
-import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
-import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
-import org.springframework.web.reactive.socket.server.WebSocketService;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Configuration
-public class WebSocketConfig {
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    // WebSocketHandlerAdapter để xử lý các yêu cầu WebSocket
-    @Bean
-    public WebSocketHandlerAdapter handlerAdapter() {
-        return new WebSocketHandlerAdapter(webSocketService());
+    @Value("${app.client.url}")
+    private String clientUrl;
+
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        config.enableSimpleBroker("/topic", "/user");  // Kênh chung cho thông báo và kênh riêng cho người dùng
+        config.setApplicationDestinationPrefixes("/app");
+        config.setUserDestinationPrefix("/user"); // Để xử lý tin nhắn cá nhân
     }
 
-    // Sử dụng HandshakeWebSocketService thay vì WebSocketService để xử lý nâng cấp kết nối WebSocket
-    @Bean
-    public WebSocketService webSocketService() {
-        return new HandshakeWebSocketService(new ReactorNettyRequestUpgradeStrategy());
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/ws") // endpoint WebSocket của bạn
+                .setAllowedOrigins(clientUrl) ;// cho phép truy cập từ client
     }
 }
