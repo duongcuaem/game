@@ -1,11 +1,12 @@
-FROM maven:3-openjdk-17 AS build
+# Build stage: sử dụng Maven với JDK 23 để build dự án
+FROM maven:3-openjdk-23 AS build
 WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
 
-# Run stage
-FROM openjdk:17-jdk-slim
+# Run stage: sử dụng JDK 23 để chạy ứng dụng
+FROM openjdk:23-jdk-slim
 WORKDIR /app
-COPY --from=build /app/target/DrComputer-0.0.1-SNAPSHOT.war drcomputer.war
-EXPOSE 8080 
-ENTRYPOINT ["java","-jar","drcomputer.war"]
+COPY --from=build /app/target/lyn-0.0.1-SNAPSHOT.war lyn.war
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "lyn.war"]

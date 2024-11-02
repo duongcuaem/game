@@ -5,11 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 @Document(collection = "messages")
 public class Message {
     @Id
@@ -21,6 +17,54 @@ public class Message {
     private String content;
     private LocalDateTime timestamp;
     
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
+
+    public String getRecipientId() {
+        return recipientId;
+    }
+
+    public void setRecipientId(String recipientId) {
+        this.recipientId = recipientId;
+    }
+
+    public String getChannelId() {
+        return channelId;
+    }
+
+    public void setChannelId(String channelId) {
+        this.channelId = channelId;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public Message() {
     }
 

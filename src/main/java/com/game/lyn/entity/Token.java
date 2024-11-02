@@ -10,11 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
-
-@Setter
-@Getter
 @Entity
 @Table(name = "t_token")
 public class Token extends BaseEntity {
@@ -37,6 +32,54 @@ public class Token extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean isRevoked = false;  // Trạng thái token: true nếu bị thu hồi, mặc định là false
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public LocalDateTime getIssuedAt() {
+        return issuedAt;
+    }
+
+    public void setIssuedAt(LocalDateTime issuedAt) {
+        this.issuedAt = issuedAt;
+    }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt;
+    }
+
+    public Boolean getIsRevoked() {
+        return isRevoked;
+    }
+
+    public void setIsRevoked(Boolean isRevoked) {
+        this.isRevoked = isRevoked;
+    }
 
     // Getters và Setters
 }
