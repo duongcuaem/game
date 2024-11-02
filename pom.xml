@@ -83,6 +83,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId> <!-- Cập nhật phiên bản PostgreSQL driver để sửa lỗi bảo mật -->
+			<version>42.7.4</version> <!-- Hoặc phiên bản phù hợp -->
 		</dependency>
 
 		<!-- logger -->
