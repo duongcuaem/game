@@ -7,4 +7,6 @@ import com.game.lyn.entity.Role;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
+     // Phương thức kiểm tra xem Role có tồn tại bằng ID
+     boolean existsById(Long id);
 }

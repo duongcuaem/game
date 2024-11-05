@@ -1,6 +1,7 @@
 package com.game.lyn.controller;
 
 import com.game.lyn.common.dto.LoginRequest;
+import com.game.lyn.common.dto.RegisterAdminRequest;
 import com.game.lyn.common.dto.RegisterRequest;
 import com.game.lyn.common.dto.ResponseDTO;
 import com.game.lyn.service.AuthService;
@@ -15,9 +16,15 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "AuthController", description = "API xử lý thông tin người dùng")
 @RequestMapping("/auth")
 public class AuthController {
-
-    @Autowired
+     @Autowired
     private AuthService authService;
+
+    // API Đăng ký admin mới
+    @Operation(summary = "Đăng ký Admin")
+    @PostMapping("/admin/register")
+    public ResponseDTO  registerAdmin(@RequestBody RegisterAdminRequest registerAdminRequest) {
+        return authService.registerAdmin(registerAdminRequest);
+    }
 
     // API Đăng ký người dùng mới
     @Operation(summary = "Đăng ký người dùng")

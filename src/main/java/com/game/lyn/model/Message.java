@@ -76,4 +76,12 @@ public class Message {
         this.content = content;
         this.timestamp = timestamp;
     }
+
+    public Message(String senderId, String recipientId, String channelId, String content, LocalDateTime timestamp) {
+        this.senderId = senderId;
+        this.recipientId = recipientId;
+        this.channelId = channelId;
+        this.content = content;
+        this.timestamp = timestamp;
+    }
 }

@@ -77,7 +77,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
                     // Lấy vai trò của người dùng
                     List<String> roles = user.getRoles().stream()
-                        .map(role -> role.getRoleName())  // Giả sử `roleName` là tên của vai trò trong class `Role`
+                        .map(role -> role.getRoleKey()) 
                         .collect(Collectors.toList());
 
                     // Tạo danh sách authorities từ vai trò
@@ -94,6 +94,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
                     // Cập nhật SecurityContext với đối tượng xác thực
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    // Log các quyền
+                    authenticationToken.getAuthorities().forEach(auth -> {
+                        System.out.println("GrantedAuthority từ JWT: " + auth.getAuthority());
+                    });
                 }
             }
         }

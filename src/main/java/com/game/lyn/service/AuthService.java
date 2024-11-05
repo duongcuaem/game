@@ -1,10 +1,13 @@
 package com.game.lyn.service;
 
+import com.game.lyn.common.dto.RegisterAdminRequest;
 import com.game.lyn.common.dto.RegisterRequest;
 import com.game.lyn.common.dto.ResponseDTO;
+import com.game.lyn.entity.Role;
 import com.game.lyn.entity.Token;
 import com.game.lyn.entity.User;
 import com.game.lyn.exception.CustomException;
+import com.game.lyn.repository.RoleRepository;
 import com.game.lyn.repository.TokenRepository;
 import com.game.lyn.repository.UserRepository;
 import com.game.lyn.security.JwtUtils;
@@ -47,8 +50,60 @@ public class AuthService {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     // Tạo logger
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+
+    // Xử lý đăng ký admin
+    public ResponseDTO registerAdmin(RegisterAdminRequest registerAdminRequest) {
+        String username = registerAdminRequest.getUsername();
+        String password = registerAdminRequest.getPassword();
+        Long roleId = registerAdminRequest.getRoleId();
+
+        try {
+            // Kiểm tra xem username đã tồn tại chưa
+            if (userRepository.existsByUsername(username)) {
+                throw new CustomException("Tên tài khoản đã tồn tại", "Vui lòng chọn tên khác", HttpStatus.CONFLICT);
+            }
+
+            // Kiểm tra password có trùng nhau không
+            if (!password.equals(registerAdminRequest.getConfirmPassword())) {
+                throw new CustomException("Mật khẩu không trùng nhau", "Mật khẩu nhập lại không khớp", HttpStatus.BAD_REQUEST);
+            }
+
+            // Kiểm tra RoleId và truy xuất Role
+            Role role = null;
+            if (roleId != null) {
+                role = roleRepository.findById(roleId).orElseThrow(() ->
+                    new CustomException("Vai trò không tồn tại", "Vui lòng chọn vai trò hợp lệ", HttpStatus.NOT_FOUND)
+                );
+            }
+
+            // Tạo một user mới
+            User user = new User();
+            user.setUsername(username); // Tên người dùng
+            user.setPassword(passwordEncoder.encode(password));
+
+            // Thêm Role vào User nếu có roleId
+            if (role != null) {
+                user.getRoles().add(role); // Thêm Role vào danh sách vai trò của User
+            }
+
+            // Lưu user vào cơ sở dữ liệu
+            userRepository.save(user);
+
+            // Trả về thông báo đăng ký thành công mà không tạo token
+            return new ResponseDTO("success", "Bạn đã đăng kí thành công!", null);
+            
+        } catch (Exception ex) {
+            // Ghi log lỗi không xác định và ném ngoại lệ
+            ex.printStackTrace();
+            logger.error("Lỗi không xác định trong quá trình đăng ký tài khoản", username, ex.getMessage());
+            throw new CustomException("Đã xảy ra lỗi trong quá trình đăng ký", ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     // Xử lý đăng ký
     public ResponseDTO registerUser(RegisterRequest registerRequest) {

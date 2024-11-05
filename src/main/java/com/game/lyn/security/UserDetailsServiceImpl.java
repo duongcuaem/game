@@ -26,7 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // Chuyển đổi `Set<Role>` thành `Collection<GrantedAuthority>`
         Collection<SimpleGrantedAuthority> authorities = user.getRoles().stream()
-            .map(role -> new SimpleGrantedAuthority(role.getRoleName()))  // Sử dụng roleName hoặc roleKey tùy cấu trúc của bạn
+            .map(role -> new SimpleGrantedAuthority(role.getRoleKey()))  // Sử dụng roleName hoặc roleKey tùy cấu trúc của bạn
             .collect(Collectors.toList());
 
         return new MyUserDetails(user.getId(), user.getUsername(), user.getPassword(), authorities);

@@ -16,7 +16,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic", "/user");  // Kênh chung cho thông báo và kênh riêng cho người dùng
+        config.enableSimpleBroker("/topic", "/queue");  // Kênh chung cho thông báo và kênh riêng cho người dùng
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user"); // Để xử lý tin nhắn cá nhân
     }

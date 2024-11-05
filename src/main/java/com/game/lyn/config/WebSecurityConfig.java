@@ -43,10 +43,12 @@ public class WebSecurityConfig {
             .csrf(csrf -> csrf.disable())  // Vô hiệu hóa CSRF, thường không cần thiết khi sử dụng JWT
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/ws/**").permitAll() // Cho phép truy cập công khai đến WebSocket endpoint
+                .requestMatchers("/api/**").permitAll() // Cho phép truy cập công khai
                 .requestMatchers("/auth/register", "/auth/login").permitAll()  // Cho phép truy cập không cần xác thực cho các endpoint này
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()  // Cho phép truy cập không cần xác thực cho Swagger UI
                 .requestMatchers("/admin/super/**").hasRole("SUPER_ADMIN")  // Chỉ người dùng với vai trò SUPER_ADMIN mới có quyền truy cập endpoint này
                 .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")  // Người dùng có vai trò ADMIN hoặc SUPER_ADMIN mới có quyền truy cập
+                .requestMatchers("/auth/admin/register").hasRole("ADMIN") // Chỉ cho phép quyền ADMIN
                 .anyRequest().authenticated()  // Các yêu cầu khác đều yêu cầu người dùng phải xác thực
             )
             .sessionManagement(session -> session
@@ -74,7 +76,7 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(clientUrl)); // Cho phép nguồn từ localhost:5173 (client của bạn)
+        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Cho phép nguồn từ localhost:5173 (client của bạn)
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Các phương thức được phép
         configuration.setAllowedHeaders(List.of("*")); // Cho phép tất cả các header
         configuration.setAllowCredentials(true); // Cho phép gửi cookie hoặc thông tin xác thực
