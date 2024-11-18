@@ -21,24 +21,24 @@ public class NotificationService {
     /**
      * Gửi thông báo đến một user cụ thể và lưu thông báo vào cơ sở dữ liệu.
      * 
-     * @param recipientId ID của người nhận thông báo.
+     * @param userId ID của người nhận thông báo.
      * @param content     Nội dung của thông báo.
      */
-    public void sendNotificationToUser(String recipientId, String content) {
+    public void sendNotificationToUser(String userId, String content) {
         // Tạo thông báo mới
-        Notification notification = new Notification(
-            recipientId,    // ID người nhận
-            null,           // Không phải thông báo nhóm, nên channelId là null
-            content,        // Nội dung thông báo
-            false,          // Đánh dấu là chưa đọc
-            LocalDateTime.now() // Thời gian hiện tại
-        );
+        // Notification notification = new Notification(
+        //     recipientId,    // ID người nhận
+        //     null,           // Không phải thông báo nhóm, nên channelId là null
+        //     content,        // Nội dung thông báo
+        //     false,          // Đánh dấu là chưa đọc
+        //     LocalDateTime.now() // Thời gian hiện tại
+        // );
 
         // Lưu thông báo vào cơ sở dữ liệu
-        notificationRepository.save(notification);
+        //notificationRepository.save(notification);
 
         // Gửi thông báo đến người dùng qua WebSocket
-        messagingTemplate.convertAndSendToUser(recipientId, "/queue/notification", content);
+        messagingTemplate.convertAndSendToUser(userId, "/queue/notifications", content);
     }
 
     /**
@@ -58,7 +58,7 @@ public class NotificationService {
         );
 
         // Lưu thông báo vào cơ sở dữ liệu
-        notificationRepository.save(notification);
+       // notificationRepository.save(notification);
 
         // Gửi thông báo đến kênh qua WebSocket
         messagingTemplate.convertAndSend("/topic/" + channelId, content);
@@ -70,13 +70,13 @@ public class NotificationService {
      * @param content Nội dung của thông báo.
      */
     public void sendNotificationToAll(String content) {
-        Notification notification = new Notification(
-            null, // Không có người nhận cụ thể
-            null, // ID kênh giả định cho toàn hệ thống
-            content,
-            false,
-            LocalDateTime.now()
-        );
+        // Notification notification = new Notification(
+        //     null, // Không có người nhận cụ thể
+        //     null, // ID kênh giả định cho toàn hệ thống
+        //     content,
+        //     false,
+        //     LocalDateTime.now()
+        // );
 
         // Lưu thông báo vào cơ sở dữ liệu
         //notificationRepository.save(notification);

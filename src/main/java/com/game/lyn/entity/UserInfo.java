@@ -23,7 +23,10 @@ public class UserInfo extends BaseEntity{
     private Long UID;  // Unique ID tự động tăng
 
     @Column(nullable = false, unique = true)
-    private String id;  // ID đăng nhập
+    private String userId;  // ID đăng nhập
+
+    @Column(nullable = false, unique = true)
+    private String userName;  // Tên tài khoản
 
     @Column(nullable = false, unique = true)
     private String name;  // Tên nhân vật
@@ -72,7 +75,7 @@ public class UserInfo extends BaseEntity{
     private int hu = 0;  // Số lần Nổ Hũ Red
 
     @Column(nullable = false)
-    private boolean type = false;  // Bot = true | User = false
+    private short type = 1;  // User = 1 | Admin = 2 | Bot = 3 | Daily = 4
 
     @Column(nullable = false)
     private boolean veryphone = false;  // Trạng thái xác thực điện thoại
@@ -102,14 +105,6 @@ public class UserInfo extends BaseEntity{
 
     public void setUID(Long uID) {
         UID = uID;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -232,11 +227,11 @@ public class UserInfo extends BaseEntity{
         this.hu = hu;
     }
 
-    public boolean isType() {
+    public short isType() {
         return type;
     }
 
-    public void setType(boolean type) {
+    public void setType(short type) {
         this.type = type;
     }
 
@@ -294,6 +289,22 @@ public class UserInfo extends BaseEntity{
 
     public void setRights(int rights) {
         this.rights = rights;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     @Embeddable

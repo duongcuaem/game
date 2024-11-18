@@ -12,6 +12,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 import java.util.List;
@@ -22,8 +23,8 @@ import java.util.stream.Collectors;
 @Component
 public class JwtUtils {
 
-    // Khóa bí mật để mã hóa JWT
-    private final String jwtSecret = "devGameLyn2024bMdfh82JSkwrBvLZf78HsT89FnAzR3kQ";
+    @Value("${jwt.secret}")
+    private String jwtSecret;
     
     // Thời gian hết hạn của JWT (1 ngày)
     private final int jwtExpirationMs = 86400000; //  token tồn tại 1 ngày

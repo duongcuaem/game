@@ -5,68 +5,78 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.game.lyn.security.JwtRequestFilter;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.util.List;
 
-@Configuration  // Đánh dấu class này là một class cấu hình của Spring
-@EnableWebSecurity  // Kích hoạt Spring Security để bảo vệ ứng dụng
+@Configuration
+@EnableWebSecurity
 public class WebSecurityConfig {
 
-    // JwtRequestFilter là một custom filter để xử lý xác thực JWT
-    private final JwtRequestFilter jwtRequestFilter;
+    // Inject khóa bí mật từ application.properties hoặc biến môi trường
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
-    // Inject biến clientUrl từ application.properties
-    @Value("${app.client.url}")
-    private String clientUrl;
-
-    // Constructor để tiêm JwtRequestFilter
-    public WebSecurityConfig(JwtRequestFilter jwtRequestFilter) {
-        this.jwtRequestFilter = jwtRequestFilter;
-    }
-
-    // Phương thức cấu hình bảo mật với HttpSecurity
+    // Cấu hình SecurityFilterChain cho Spring Security
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Thêm cấu hình CORS
-            .csrf(csrf -> csrf.disable())  // Vô hiệu hóa CSRF, thường không cần thiết khi sử dụng JWT
+            // Cấu hình CORS
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // Vô hiệu hóa CSRF vì chúng ta sử dụng JWT
+            .csrf(csrf -> csrf.disable())
+            // Cấu hình phân quyền cho các yêu cầu HTTP
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/ws/**").permitAll() // Cho phép truy cập công khai đến WebSocket endpoint
-                .requestMatchers("/api/**").permitAll() // Cho phép truy cập công khai
-                .requestMatchers("/auth/register", "/auth/login").permitAll()  // Cho phép truy cập không cần xác thực cho các endpoint này
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()  // Cho phép truy cập không cần xác thực cho Swagger UI
-                .requestMatchers("/admin/super/**").hasRole("SUPER_ADMIN")  // Chỉ người dùng với vai trò SUPER_ADMIN mới có quyền truy cập endpoint này
-                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")  // Người dùng có vai trò ADMIN hoặc SUPER_ADMIN mới có quyền truy cập
-                .requestMatchers("/auth/admin/register").hasRole("ADMIN") // Chỉ cho phép quyền ADMIN
-                .anyRequest().authenticated()  // Các yêu cầu khác đều yêu cầu người dùng phải xác thực
+                // Cho phép truy cập không cần xác thực đến các endpoint này
+                .requestMatchers("/ws/**").permitAll()
+                .requestMatchers("/api/**").permitAll()
+                .requestMatchers("/auth/register", "/auth/login").permitAll()
+                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/auth/admin/register").hasRole("ADMIN")
+                .anyRequest().authenticated()
             )
+            // Cấu hình quản lý session là stateless vì sử dụng JWT
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Cấu hình session stateless vì sử dụng JWT (không lưu trữ session trên server)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            // Thêm JWT filter trước UsernamePasswordAuthenticationFilter để xử lý JWT trước khi xác thực thông thường
-            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+            // Cấu hình để sử dụng xác thực JWT với oauth2ResourceServer
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt.decoder(jwtDecoder()))
+            );
 
-        return http.build();  // Trả về cấu hình HttpSecurity đã hoàn thành
+        return http.build();
+    }
+    // Bean để giải mã và xác thực JWT
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        return NimbusJwtDecoder.withSecretKey(secretKey()).build();
     }
 
-    // Bean để mã hóa mật khẩu sử dụng BCryptPasswordEncoder, đây là một tiêu chuẩn tốt cho bảo mật mật khẩu
+    // Tạo SecretKey từ khóa bí mật
+    @Bean
+    public SecretKey secretKey() {
+        return new SecretKeySpec(jwtSecret.getBytes(), "HmacSHA256");
+    }
+
+    // Bean để mã hóa mật khẩu sử dụng BCryptPasswordEncoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Bean để cung cấp AuthenticationManager, cần thiết khi muốn quản lý xác thực tùy chỉnh
+    // Bean để cung cấp AuthenticationManager
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
@@ -76,13 +86,18 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Cho phép nguồn từ localhost:5173 (client của bạn)
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Các phương thức được phép
-        configuration.setAllowedHeaders(List.of("*")); // Cho phép tất cả các header
-        configuration.setAllowCredentials(true); // Cho phép gửi cookie hoặc thông tin xác thực
+        // Thêm các nguồn được phép truy cập (thay thế bằng URL của client của bạn)
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        // Cho phép các phương thức HTTP
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Cho phép tất cả các header
+        configuration.setAllowedHeaders(List.of("*"));
+        // Cho phép gửi thông tin xác thực (như cookie)
+        configuration.setAllowCredentials(true);
 
+        // Áp dụng cấu hình CORS cho tất cả các endpoint
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Áp dụng cấu hình CORS cho tất cả các endpoint
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }

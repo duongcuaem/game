@@ -1,31 +1,54 @@
-// package com.game.lyn.controller;
+package com.game.lyn.controller;
 
-// import com.game.lyn.entity.User;
-// import com.game.lyn.service.UserService;
-// import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-// @RestController
-// @RequestMapping("/users")
-// public class UserController {
+import com.game.lyn.entity.User;
+import com.game.lyn.service.UserService;
 
-//     private final UserService userService;
+import java.util.Date;
 
-//     public UserController(UserService userService) {
-//         this.userService = userService;
-//     }
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
 
-//     @GetMapping("/{id}")
-//     public User getUser(@PathVariable Long id) {
-//         return userService.getUserById(id);
-//     }
+    @Autowired
+    private UserService userService;
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        return userService.getUserById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-//     @PostMapping("/update")
-//     public User updateUser(@RequestBody User user) {
-//         return userService.updateUser(user);
-//     }
+    @PostMapping
+    public User createUser(@RequestBody User user) {
+        return userService.saveUser(user);
+    }
 
-//     @DeleteMapping("/{id}")
-//     public void deleteUser(@PathVariable Long id) {
-//         userService.deleteUser(id);
-//     }
-// }
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+        return ResponseEntity.ok(userService.updateUser(id, userDetails));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/lock")
+    public ResponseEntity<User> lockUserAccount(@PathVariable Long id) {
+        User updatedUser = userService.lockUserAccount(id);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @PutMapping("/{id}/unlock")
+    public ResponseEntity<User> unlockUserAccount(@PathVariable Long id) {
+        User updatedUser = userService.unlockUserAccount(id);
+        return ResponseEntity.ok(updatedUser);
+    }
+}
