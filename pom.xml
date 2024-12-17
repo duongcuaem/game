@@ -62,11 +62,11 @@
         </dependency>
 
 		<!-- Tomcat để deploy dưới dạng WAR -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-tomcat</artifactId>
-			<scope>provided</scope> <!-- Sử dụng Tomcat đã cài đặt trên server -->
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-tomcat</artifactId>-->
+<!--			<scope>provided</scope> &lt;!&ndash; Sử dụng Tomcat đã cài đặt trên server &ndash;&gt;-->
+<!--		</dependency>-->
 
 		<!-- Spring Security -->
 		<dependency>
@@ -115,18 +115,19 @@
 			<artifactId>jjwt-jackson</artifactId> <!-- Để parse JWT token thành JSON -->
 			<version>0.11.2</version>
 		</dependency>
+		<!-- Jakarta Servlet -->
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>4.0.1</version>
-			<scope>provided</scope>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
 		</dependency>
 
+
 		<!-- Spring WebFlux -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-webflux</artifactId>-->
+<!--		</dependency>-->
 
 		<!-- WebSocket dependency -->
 		<dependency>
@@ -145,7 +146,14 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+
 
 		<!-- MongoDB -->
 		<dependency>

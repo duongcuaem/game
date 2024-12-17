@@ -1,8 +1,8 @@
-package com.game.lyn.common.dto;
+package com.game.lyn.dto.responseDTO;
 
 
 
-public class ResponseDTO {
+public class AuthDTO {
 
     private String status;
     private String title;
@@ -32,7 +32,7 @@ public class ResponseDTO {
         this.token = token;
     }
 
-    public ResponseDTO(String status, String title, String token) {
+    public AuthDTO(String status, String title, String token) {
         this.status = status;
         this.title = title;
         this.token = token;

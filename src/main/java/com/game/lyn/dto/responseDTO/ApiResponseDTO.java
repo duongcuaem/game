@@ -1,10 +1,10 @@
-package com.game.lyn.common.dto;
+package com.game.lyn.dto.responseDTO;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiResponse<T> {
+public class ApiResponseDTO<T> {
     private int code = 200;
     private String message;
     private T result;

@@ -1,6 +1,6 @@
-package com.game.lyn.common.dto;
+package com.game.lyn.dto.requestDTO;
 
-public class RegisterAdminRequest {
+public class RegisterAdminRequestDTO {
     private String username;
     private String password;
     private String confirmPassword;

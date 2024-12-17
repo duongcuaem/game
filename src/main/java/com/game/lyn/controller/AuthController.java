@@ -1,9 +1,9 @@
 package com.game.lyn.controller;
 
-import com.game.lyn.common.dto.LoginRequest;
-import com.game.lyn.common.dto.RegisterAdminRequest;
-import com.game.lyn.common.dto.RegisterRequest;
-import com.game.lyn.common.dto.ResponseDTO;
+import com.game.lyn.dto.requestDTO.LoginRequestDTO;
+import com.game.lyn.dto.requestDTO.RegisterAdminRequestDTO;
+import com.game.lyn.dto.requestDTO.RegisterRequestDTO;
+import com.game.lyn.dto.responseDTO.AuthDTO;
 import com.game.lyn.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,21 +22,21 @@ public class AuthController {
     // API Đăng ký admin mới
     @Operation(summary = "Đăng ký Admin")
     @PostMapping("/admin/register")
-    public ResponseDTO  registerAdmin(@RequestBody RegisterAdminRequest registerAdminRequest) {
-        return authService.registerAdmin(registerAdminRequest);
+    public AuthDTO registerAdmin(@RequestBody RegisterAdminRequestDTO registerAdminRequestDTO) {
+        return authService.registerAdmin(registerAdminRequestDTO);
     }
 
     // API Đăng ký người dùng mới
     @Operation(summary = "Đăng ký người dùng")
     @PostMapping("/register")
-    public ResponseDTO  register(@RequestBody RegisterRequest registerRequest) {
-        return authService.registerUser(registerRequest);
+    public AuthDTO register(@RequestBody RegisterRequestDTO registerRequestDTO) {
+        return authService.registerUser(registerRequestDTO);
     }
 
     // API Đăng nhập và trả về JWT token
     @Operation(summary = "Đăng nhập và trả về JWT token")
     @PostMapping("/login")
-    public ResponseDTO  login(@RequestBody LoginRequest loginRequest) {
-        return authService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
+    public AuthDTO login(@RequestBody LoginRequestDTO loginRequestDTO) {
+        return authService.loginUser(loginRequestDTO.getUsername(), loginRequestDTO.getPassword());
     }
 }

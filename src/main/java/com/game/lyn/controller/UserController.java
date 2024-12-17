@@ -1,37 +1,42 @@
 package com.game.lyn.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import com.game.lyn.dto.requestDTO.UserRequestDTO;
+import com.game.lyn.dto.responseDTO.UserResponseDTO;
+import com.game.lyn.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.game.lyn.entity.User;
-import com.game.lyn.service.UserService;
-
-import java.util.Date;
+import org.springframework.data.domain.Page;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
-    
+    private final UserService userService;
+
+    @GetMapping("/all")
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.saveUser(user);
+    public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userRequestDTO) {
+        return ResponseEntity.ok(userService.createUser(userRequestDTO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
-        return ResponseEntity.ok(userService.updateUser(id, userDetails));
+    public ResponseEntity<UserResponseDTO> updateUser(
+            @PathVariable Long id,
+            @RequestBody UserRequestDTO userRequestDTO) {
+        return ResponseEntity.ok(userService.updateUser(id, userRequestDTO));
     }
 
     @DeleteMapping("/{id}")
@@ -40,15 +45,24 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}/lock")
-    public ResponseEntity<User> lockUserAccount(@PathVariable Long id) {
-        User updatedUser = userService.lockUserAccount(id);
-        return ResponseEntity.ok(updatedUser);
+    // API lấy tất cả user với paging và sorting
+    @GetMapping("/api/users/paging")
+    public ResponseEntity<Page<UserResponseDTO>> getAllUsersWithPagingAndSorting(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection) {
+        return ResponseEntity.ok(userService.getAllUsersWithPagingAndSorting(page, size, sortBy, sortDirection));
     }
 
-    @PutMapping("/{id}/unlock")
-    public ResponseEntity<User> unlockUserAccount(@PathVariable Long id) {
-        User updatedUser = userService.unlockUserAccount(id);
-        return ResponseEntity.ok(updatedUser);
+    // API filter user với paging và sorting
+    @GetMapping("/filter")
+    public ResponseEntity<Page<UserResponseDTO>> filterUsersWithPagingAndSorting(
+            @RequestParam Map<String, String> filters,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection) {
+        return ResponseEntity.ok(userService.filterUsersWithPagingAndSorting(filters, page, size, sortBy, sortDirection));
     }
 }
