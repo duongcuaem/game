@@ -24,4 +24,7 @@ public interface UserInfoService {
 
     // Lấy UserInfo theo ID
     Optional<UserInfo> getUserInfoById(Long uid);
+
+    // Lấy UserInfo theo userID
+    Optional<UserInfo> getUserInfoByUserId(String userId);
 }

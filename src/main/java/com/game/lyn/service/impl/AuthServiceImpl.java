@@ -148,6 +148,9 @@ public class AuthServiceImpl implements AuthService {
 
             tokenRepository.save(token);
 
+            // lấy thông tin Role , Tên người dùng , ảnh đại diện, tên đăng nhập
+
+
             return new AuthDTO("success", "Đăng nhập thành công!", jwtToken);
         } catch (Exception ex) {
             logger.error("Lỗi trong quá trình đăng nhập: {}", ex.getMessage());

@@ -7,9 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class AuthDTO {
-
-    private String status;
-    private String title;
-    private String token;
+public class UserInfoDto {
+    private String userName;
+    private String avatar;
+    private String role;
+    private String name;
 }

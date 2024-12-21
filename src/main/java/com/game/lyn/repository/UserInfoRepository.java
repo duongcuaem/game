@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import com.game.lyn.entity.UserInfo;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
 
@@ -38,4 +39,7 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             Pageable pageable);
+
+
+    Optional<UserInfo> findByUserId(String userId);
 }

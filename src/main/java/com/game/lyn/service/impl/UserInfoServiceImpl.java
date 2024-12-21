@@ -92,4 +92,14 @@ public class UserInfoServiceImpl implements UserInfoService {
     public Optional<UserInfo> getUserInfoById(Long uid) {
         return userInfoRepository.findById(uid);
     }
+
+    /**
+     * Hàm lấy UserInfo theo UserId.
+     * @param userId của userInfo cần lấy
+     * @return Optional chứa UserInfo hoặc rỗng nếu không tìm thấy
+     */
+    @Override
+    public Optional<UserInfo> getUserInfoByUserId(String userId) {
+        return userInfoRepository.findByUserId(userId);
+    }
 }
