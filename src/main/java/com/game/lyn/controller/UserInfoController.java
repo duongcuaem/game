@@ -1,5 +1,6 @@
 package com.game.lyn.controller;
 
+import com.game.lyn.dto.responseDTO.UserInfoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,7 @@ public class UserInfoController {
     @Autowired
     private UserInfoService userInfoService;
 
-    //lấy thông tin của 1 người dùng 
-    // @GetMapping("/{id}")
-    // public ResponseEntity<UserInfo> getUserInfoById(@PathVariable Long id) {
-    //     return userInfoService.getUserInfoById(id)
-    //             .map(ResponseEntity::ok)
-    //             .orElse(ResponseEntity.notFound().build());
-    // }
+
 
     // //tạo info người dùng mới
     // @PostMapping
@@ -43,6 +38,17 @@ public class UserInfoController {
     //     userInfoService.deleteUserInfo(id);
     //     return ResponseEntity.noContent().build();
     // }
+
+    /**
+     * API để lấy  UserInfo theo username.
+     *
+     * @param username tên người dùng (username) để lấy
+     * @return UserInfo
+     */
+    @GetMapping("/dto/{username}")
+    public UserInfoDto getUserDtoByUsername(@PathVariable String username) {
+        return userInfoService.getUserDtoByUsername(username);
+    }
 
 
     /**

@@ -1,5 +1,6 @@
 package com.game.lyn.service;
 
+import com.game.lyn.dto.responseDTO.UserInfoDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -27,4 +28,10 @@ public interface UserInfoService {
 
     // Lấy UserInfo theo userID
     Optional<UserInfo> getUserInfoByUserId(String userId);
+
+    Optional<UserInfo> getUserInfoByUsername(String username);
+
+    UserInfoDto getUserDtoByUsername(String username);
+
+
 }

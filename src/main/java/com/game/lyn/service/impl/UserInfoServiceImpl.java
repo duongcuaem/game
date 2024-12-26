@@ -1,24 +1,37 @@
 package com.game.lyn.service.impl;
 
+import com.game.lyn.security.JwtUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import com.game.lyn.entity.UserInfo;
 import com.game.lyn.repository.UserInfoRepository;
 import com.game.lyn.service.UserInfoService;
 import com.game.lyn.utils.BeanUtilsHelper;
+import com.game.lyn.dto.responseDTO.UserInfoDto;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserInfoServiceImpl implements UserInfoService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     @Autowired
     private UserInfoRepository userInfoRepository;
+    private UserDetailsService userDetailsService;
+    private JwtUtils jwtUtils;
 
     /**
      * Hàm xử lý logic lấy danh sách UserInfo theo phân trang và điều kiện lọc.
@@ -101,5 +114,73 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Override
     public Optional<UserInfo> getUserInfoByUserId(String userId) {
         return userInfoRepository.findByUserId(userId);
+    }
+
+    /**
+     * Hàm lấy UserInfo theo UserId.
+     * @param username của userInfo cần lấy
+     * @return Optional chứa UserInfo hoặc rỗng nếu không tìm thấynpm
+     */
+    @Override
+    public Optional<UserInfo> getUserInfoByUsername(String username) {
+        return userInfoRepository.findByUserName(username);
+    }
+
+    /**
+     * Hàm lấy UserInfo theo username.
+     * @param username của userInfo cần lấy
+     * @return Optional chứa UserInfo hoặc rỗng nếu không tìm thấy
+     */
+    @Override
+    public UserInfoDto getUserDtoByUsername(String username) {
+        try {
+            Optional<UserInfo> userInfo = userInfoRepository.findByUserName(username);
+
+            // Lấy username từ SecurityContext
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            List<String> roles = authentication.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+
+            // Biến để lưu role hiện tại
+            final String currentRole;
+
+            // Kiểm tra và phân tích từng role
+            if (!roles.isEmpty()) {
+                currentRole = roles.stream()
+                        .filter(role -> role.equalsIgnoreCase("Role_Admin") || role.equalsIgnoreCase("Role_Manager") || role.equalsIgnoreCase("Role_User"))
+                        .findFirst()
+                        .map(role -> {
+                            if (role.equalsIgnoreCase("Role_Admin")) return "Admin";
+                            else if (role.equalsIgnoreCase("Role_Manager")) return "Manager";
+                            else return "User";
+                        })
+                        .orElse(""); // Mặc định nếu không tìm thấy role nào
+            } else {
+                currentRole = ""; // Mặc định nếu không có role
+            }
+
+            UserInfoDto userDto = new UserInfoDto();
+            // Nếu userInfo có giá trị, gán các trường vào userDto
+            if (userInfo.isPresent()) {
+                userInfo.ifPresent(info -> {
+                    userDto.setUserName(info.getUserName());
+                    userDto.setAvatar(info.getAvatar());
+                    userDto.setRole(currentRole);
+                    userDto.setName(info.getName());
+                });
+            } else {
+                // Trả về một đối tượng UserInfoDto mới nếu userInfo rỗng
+                userDto.setUserName(username);
+                userDto.setRole(currentRole);
+            }
+
+            return userDto;
+        } catch (Exception e) {
+            // Log lỗi và xử lý ngoại lệ
+            logger.error("Lỗi xảy ra khi lấy thông tin người dùng: ", e);
+            throw new RuntimeException("Đã xảy ra lỗi khi lấy thông tin người dùng", e);
+        }
     }
 }

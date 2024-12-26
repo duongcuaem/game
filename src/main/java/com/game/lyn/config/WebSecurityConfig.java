@@ -16,10 +16,15 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -41,7 +46,6 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Cho phép truy cập không cần xác thực đến các endpoint này
                 .requestMatchers("/ws/**").permitAll()
-                .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/auth/register", "/auth/login").permitAll()
                 .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/auth/admin/register").hasRole("ADMIN")
@@ -53,7 +57,10 @@ public class WebSecurityConfig {
             )
             // Cấu hình để sử dụng xác thực JWT với oauth2ResourceServer
             .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.decoder(jwtDecoder()))
+                .jwt(jwt -> jwt
+                        .decoder(jwtDecoder())
+                        .jwtAuthenticationConverter(jwtAuthenticationConverter())
+                )
             );
 
         return http.build();
@@ -100,4 +107,23 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+
+        // Tùy chỉnh ánh xạ claims "roles" thành GrantedAuthority
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            List<String> roles = jwt.getClaimAsStringList("roles");
+            if (roles == null) {
+                roles = List.of(); // Trả về danh sách rỗng nếu không có claim "roles"
+            }
+            return roles.stream()
+                    .map(role -> new SimpleGrantedAuthority(role)) // Thêm prefix "ROLE_"
+                    .collect(Collectors.toList());
+        });
+
+        return converter;
+    }
+
 }

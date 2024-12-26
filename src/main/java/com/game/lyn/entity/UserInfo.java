@@ -12,15 +12,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "user_info")
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserInfo extends BaseEntity{
 
     @Id
